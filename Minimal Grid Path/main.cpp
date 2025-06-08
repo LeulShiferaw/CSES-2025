@@ -19,23 +19,75 @@ void solve() {
         cin >> grid[i];
     }
 
-    deque<string> soln;
-    soln.push_back(string(1, grid[grid.size()-1][grid.size()-1]));
-    for(int i=n-2; i>=0; --i) {
-        soln.push_front(grid[n-1][i] + soln.front());
-    }
+    deque<vector<int>> chars;
+    vector<vector<bool>> used(n, vector<bool>(n, false));
+    chars.push_back({0, 0, 0});
+    string res = "";
+    while(chars.size() > 0) {
+        int x = chars.front()[0];
+        int y = chars.front()[1];
+        int pos = chars.front()[2];
+        
+        chars.pop_front();
 
-    for(int i=n-2; i>=0; --i) {
-        deque<string> new_soln;
-        new_soln.push_back(grid[i][n-1] + soln[n-1]);
-        for(int j=n-2; j>=0; --j) {
-            auto res = min(new_soln.front(), soln[j]);
-            new_soln.push_front(grid[i][j] + res);
+        if(used[x][y]) continue;
+        used[x][y] = true;
+
+        if(pos >= (int)res.size()) {
+            res.push_back(grid[x][y]);
+
+            if((x+1 < n) && (y+1 < n)) {
+                if(grid[x+1][y] < grid[x][y+1]) {
+                    chars.push_back({x+1, y, pos+1});
+                } else if(grid[x+1][y] > grid[x][y+1]) {
+                    chars.push_back({x, y+1, pos+1});
+                } else {
+                    chars.push_back({x+1, y, pos+1});
+                    chars.push_back({x, y+1, pos+1});
+                }
+            } else if(x+1 < n) {
+                chars.push_back({x+1, y, pos+1});
+            } else if(y+1 < n) chars.push_back({x, y+1, pos+1});
+        } else if(grid[x][y] < res[pos]) {
+            res[pos] = grid[x][y];
+
+            deque<vector<int>> tmp;
+            while(chars.size() > 0) {
+                if(chars.front()[2] == pos) {
+                    tmp.push_back(chars.front());
+                } else if(chars.front()[2] > pos) break;
+                chars.pop_front();
+            }
+            if((x+1 < n) && (y+1 < n)) {
+                if(grid[x+1][y] < grid[x][y+1]) {
+                    tmp.push_back({x+1, y, pos+1});
+                } else if(grid[x+1][y] > grid[x][y+1]) {
+                    tmp.push_back({x, y+1, pos+1});
+                } else {
+                    tmp.push_back({x+1, y, pos+1});
+                    tmp.push_back({x, y+1, pos+1});
+                }
+            } else if(x+1 < n) {
+                tmp.push_back({x+1, y, pos+1});
+            } else if(y+1 < n) tmp.push_back({x, y+1, pos+1});
+
+            swap(tmp, chars);
+        } else if(grid[x][y] == res[pos]) {
+            if((x+1 < n) && (y+1 < n)) {
+                if(grid[x+1][y] < grid[x][y+1]) {
+                    chars.push_back({x+1, y, pos+1});
+                } else if(grid[x+1][y] > grid[x][y+1]) {
+                    chars.push_back({x, y+1, pos+1});
+                } else {
+                    chars.push_back({x+1, y, pos+1});
+                    chars.push_back({x, y+1, pos+1});
+                }
+            } else if(x+1 < n) {
+                chars.push_back({x+1, y, pos+1});
+            } else if(y+1 < n) chars.push_back({x, y+1, pos+1});
         }
-        swap(new_soln, soln);
     }
-
-    cout << soln[0] << endl;
+    cout << res << endl;
 }
 
 int main() {
